@@ -3,6 +3,7 @@
 ***
 
 1 Process
+
 2 Pthread
 
 2.2. Bakery Algothim. 
