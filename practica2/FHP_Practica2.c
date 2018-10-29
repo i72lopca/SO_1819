@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#define ITER    100
+#define ITER    10
 #define NHILOS  4
 
 double counter = 0;
@@ -17,11 +17,13 @@ int Eligiendo[NHILOS];
 void lock(int thread);//algorigmo de lamport
 void unlock(int thread);
 void *adder(void *);
+int max_vector(int *number);
 
 int main(){
     pthread_t hilos[NHILOS];
     int status, i, v[NHILOS];
     extern double counter;
+
     double *r_value;
 
     //memset((int*)Numero, 0, sizeof(Numero));
@@ -54,26 +56,37 @@ int main(){
     return 0;
 }
 
-
+int max_vector(int *number) {
+  int higher = 0;
+  for(int i = 0; i < NHILOS; i++) {
+    if (number[i] > higher) {
+      higher = number[i];
+    }    
+  }
+  return higher;  
+}
 
 void lock(int thread) {
-    Eligiendo[thread] = 1;
-    int max_ticket = 0;
-    for (int i = 0; i < NHILOS; ++i) {
-        int ticket = Numero[i];
-        //max_ticket = ticket > max_ticket ? ticket : max_ticket;
-        if(ticket>max_ticket){
-            max_ticket=ticket;
-        }
 
-    }
-    Numero[thread] = max_ticket + 1;
-    Eligiendo[thread] = 0;
-    for (int j = 0; j < NHILOS; ++j) {
-        while (Eligiendo[j]) { }
-        while (Numero[j] != 0 &&
+    //extern int Eligiendo[NHILOS];
+    //extern int Numero[NHILOS];    
+
+    for (int i = 0; i < NHILOS; ++i) {
+        Eligiendo[thread] = 1;//cuando esta eligiendo numero su Eligiendo es true o 1
+        //int max_ticket = 0;
+        //int ticket = Numero[i];
+        //max_ticket = ticket > max_ticket ? ticket : max_ticket;
+        //if(ticket>max_ticket){
+        //    max_ticket=ticket;
+        //}
+        Numero[thread] = max_vector(Numero) + 1;
+        Eligiendo[thread] = 0;
+        for (int j = 0; j < NHILOS; ++j) {
+            while (Eligiendo[j]) { }
+            while (Numero[j] != 0 &&
                (Numero[j] < Numero[thread] ||
                 (Numero[j] == Numero[thread] && j < thread))) { }
+        }
     }
 }
 
@@ -81,10 +94,6 @@ void unlock(int thread) {
    
     Numero[thread] = 0;
 }
-
-
-
-
 
 void *adder(void *p){
     double l; //variable local donde se almacena el contador individual de cada hilo
@@ -95,13 +104,11 @@ void *adder(void *p){
     int *id; //variable a la que asignamos el valor recibido porla funcion
     id = (int *) p;// se hace un casting (int*) al valor recibido por la funcion que es de tipo void
 
-
-
     for (int i = 0; i < ITER; i++) {
     //seccion critica del hilo
 	   lock(*id);
        l = counter;
-	   fprintf(stdout, "Hilo %d: %f\n", *id, counter);
+	   //fprintf(stdout, "Hilo %d: %f\n", *id, counter);
 	   l++;
 	   counter = l;
        unlock(*id);
