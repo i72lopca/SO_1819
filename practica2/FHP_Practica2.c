@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#define ITER    10
+#define ITER    1000
 #define NHILOS  4
 
 double counter = 0;
@@ -56,14 +56,14 @@ int main(){
     return 0;
 }
 
-int max_vector(int *number) {
-  int higher = 0;
+int max_vector(int *num) {
+  int max = 0;
   for(int i = 0; i < NHILOS; i++) {
-    if (number[i] > higher) {
-      higher = number[i];
+    if (num[i] > max) {
+      max = num[i];
     }    
   }
-  return higher;  
+  return max;  
 }
 
 void lock(int thread) {
