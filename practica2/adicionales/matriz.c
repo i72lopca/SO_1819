@@ -8,6 +8,7 @@ cual además envía al padre. El padre debe esperar por la terminación de cada 
 el vector resultante.*/
 
 //gcc -Wpedantic
+//git commit -am  "adicional" --no-verify 
 
 
 #include <stdio.h>
@@ -79,7 +80,7 @@ int main(int argc, char const *argv[]){
 
 
 
-    //free res;
+    free(res);
 
 
 	return 0;
@@ -126,17 +127,20 @@ void *multiplica(void *thread){
 	int *hilo = (int *)thread;
 	extern int m[sz][sz];
 	extern int v[sz];
+	int resultado=0;
+
+	
+	printf("hilo:%d\n", *hilo);
+	
+	for(int i=0; i<sz; i++){
+		(resultado) += (m[*hilo][i] * v[i]);
+	}
 
 	long *res=(long*)malloc(sizeof(long)); //Esta memoria hay que liberarla en el main despues de usarla en el pthread_join()
 	*res=666;
-	printf("La matriz szxsz sdfadfa sdfs:\n");
-	/*
-	for(int i=0; i<sz; i++){
-		(*res) += (m[*hilo][i] + v[i]);
-	}
-		printf("xxxx:\n");
 
-	*/
+	*res=resultado;
+	
 	pthread_exit((void*) res);
 
 
