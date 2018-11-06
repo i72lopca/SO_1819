@@ -17,33 +17,29 @@ el vector resultante.*/
 #include <time.h>
 
 #define sz 3
+#define randomize 5
 
 int Numero[sz];
 int Eligiendo[sz];
-
+int m[sz][sz];
+int v[sz];
 
 
 void rellenamatriz();
 void rellenavector();
-
 void vermatriz();
 void vervector();
-
 void lock(int thread);//algorigmo de lamport
 void unlock(int thread);
-
 int max_vector(int *number);
-
-
 void *multiplica();
 
-int m[sz][sz];
-int v[sz];
 
 int main(int argc, char const *argv[]){
 
 	extern int m[sz][sz];
 	extern int v[sz];
+	int vresultado[sz];
 
 	int nhilos=sz;
 
@@ -69,7 +65,6 @@ int main(int argc, char const *argv[]){
 
 		//if ((status = pthread_create(&vthread[i], NULL, multiplica, (void *) &vhilos[i])))
 		if ((status = pthread_create(&vthread[i], NULL, multiplica, (void *) &vhilos[i])))//no funciona con pasando a la función &i
-	    
 	    exit(status);
     }
 
@@ -83,11 +78,11 @@ int main(int argc, char const *argv[]){
        //se guardara el valor devuelto por el hijo al finalizar
 	  
        printf("Value returned by %lu thread: %i\n", vthread[i], *res);
+	    vresultado[i]=*res;
 
-       //v[vthread[i]]=*res;
     }
 
-    //printf("%s\n", );
+ 	vervector(vresultado);
 
 
 
@@ -101,7 +96,7 @@ int main(int argc, char const *argv[]){
 void rellenamatriz(int m[sz][sz]){
 	for(int i=0; i<sz; i++){
 		for(int j=0; j<sz; j++){
-			m[i][j]=rand()%50;
+			m[i][j]=rand()%randomize;
 		}
 	}
 }
@@ -109,7 +104,7 @@ void rellenamatriz(int m[sz][sz]){
 void rellenavector(int v[sz]){
 	for(int i=0; i<sz; i++){
 		
-		v[i]=rand()%50;
+		v[i]=rand()%randomize;
 	
 	}
 }
@@ -145,16 +140,16 @@ void *multiplica(void *thread){
 	int resultado=0;
 
 	
-	printf("hilo:%d\n", *hilo);
+	printf("hilo:%d: ", *hilo);
 	
 	for(int i=0; i<sz; i++){
-	   //lock(*hilo);
-		
+	   	//lock(*hilo);
+		printf("%d -", m[*hilo][i]);
 		(resultado) += (m[*hilo][i] * v[i]);
-       //unlock(*hilo);
+       	//unlock(*hilo);
 
 	}
-
+	printf("\n");
 	long *res=(long*)calloc(1,sizeof(long)); //Esta memoria hay que liberarla en el main despues de usarla en el pthread_join()
 	//*res=666;
 
