@@ -18,6 +18,9 @@ el vector resultante.*/
 
 #define sz 3
 
+int Numero[sz];
+int Eligiendo[sz];
+
 
 
 void rellenamatriz();
@@ -25,6 +28,12 @@ void rellenavector();
 
 void vermatriz();
 void vervector();
+
+void lock(int thread);//algorigmo de lamport
+void unlock(int thread);
+
+int max_vector(int *number);
+
 
 void *multiplica();
 
@@ -38,10 +47,10 @@ int main(int argc, char const *argv[]){
 
 	int nhilos=sz;
 
-	int status, i;
+	int status, i, vhilos[sz];
 	long *res;
 
-	pthread_t vthread[nhilos];
+	pthread_t vthread[sz];
 
 	srand(time(NULL));
 	rellenamatriz(m);
@@ -56,8 +65,10 @@ int main(int argc, char const *argv[]){
 	//creando hilos
 
 	for (i = 0; i < nhilos; i++){
+		vhilos[i] = i;
 
-		if ((status = pthread_create(&vthread[i], NULL, multiplica, (void *) &i)))
+		//if ((status = pthread_create(&vthread[i], NULL, multiplica, (void *) &vhilos[i])))
+		if ((status = pthread_create(&vthread[i], NULL, multiplica, (void *) &vhilos[i])))//no funciona con pasando a la función &i
 	    
 	    exit(status);
     }
@@ -120,6 +131,10 @@ void vervector(int v[sz]){
 		
 	}
 
+	
+	printf("\n");
+
+
 }
 
 void *multiplica(void *thread){
@@ -133,15 +148,58 @@ void *multiplica(void *thread){
 	printf("hilo:%d\n", *hilo);
 	
 	for(int i=0; i<sz; i++){
+	   //lock(*hilo);
+		
 		(resultado) += (m[*hilo][i] * v[i]);
+       //unlock(*hilo);
+
 	}
 
-	long *res=(long*)malloc(sizeof(long)); //Esta memoria hay que liberarla en el main despues de usarla en el pthread_join()
-	*res=666;
+	long *res=(long*)calloc(1,sizeof(long)); //Esta memoria hay que liberarla en el main despues de usarla en el pthread_join()
+	//*res=666;
 
 	*res=resultado;
 	
 	pthread_exit((void*) res);
 
 
+}
+
+void lock(int thread) {
+
+    //extern int Eligiendo[sz];
+    //extern int Numero[sz];    
+
+    for (int i = 0; i < sz; ++i) {
+        Eligiendo[thread] = 1;//cuando esta eligiendo numero su Eligiendo es true o 1
+        //int max_ticket = 0;
+        //int ticket = Numero[i];
+        //max_ticket = ticket > max_ticket ? ticket : max_ticket;
+        //if(ticket>max_ticket){
+        //    max_ticket=ticket;
+        //}
+        Numero[thread] = max_vector(Numero) + 1;
+        Eligiendo[thread] = 0;
+        for (int j = 0; j < sz; ++j) {
+            while (Eligiendo[j]) { }
+            while (Numero[j] != 0 &&
+               (Numero[j] < Numero[thread] ||
+                (Numero[j] == Numero[thread] && j < thread))) { }
+        }
+    }
+}
+
+void unlock(int thread) {
+   
+    Numero[thread] = 0;
+}
+
+int max_vector(int *num) {
+  int max = 0;
+  for(int i = 0; i < sz; i++) {
+    if (num[i] > max) {
+      max = num[i];
+    }    
+  }
+  return max;  
 }
